@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mi Cuponera Especial ✨</title>
+  
+  <!-- Tailwind CSS para diseño limpio y responsivo -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Fuentes de Google: Plus Jakarta Sans y Fraunces para toques editoriales -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Librería ligera de Confeti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Fraunces"', 'serif'],
+          },
+          colors: {
+            cream: '#FAF8F5',
+            card: '#FFFFFF',
+            ink: '#1E1D1B',
+            muted: '#6E6A63',
+            coral: {
+              DEFAULT: '#E06D53',
+              light: '#FDF0ED',
+              dark: '#C8563D'
+            },
+            gold: {
+              DEFAULT: '#D99B26',
+              light: '#FDF6E7',
+              dark: '#B88019'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #FAF8F5;
+      color: #1E1D1B;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Estilo de ticket perforado sutil */
+    .ticket-divider {
+      position: relative;
+      border-top: 2px dashed #EAE5DC;
+    }
+    .ticket-divider::before,
+    .ticket-divider::after {
+      content: '';
+      position: absolute;
+      top: -10px;
+      width: 18px;
+      height: 18px;
+      background-color: #FAF8F5;
+      border-radius: 9999px;
+    }
+    .ticket-divider::before {
+      left: -29px;
+      box-shadow: inset -2px 0 3px rgba(0,0,0,0.03);
+    }
+    .ticket-divider::after {
+      right: -29px;
+      box-shadow: inset 2px 0 3px rgba(0,0,0,0.03);
+    }
+
+    /* Animación suave para modales y notificaciones */
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.94) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-pop {
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-coral-light selection:text-coral">
+
+  <!-- Contenedor principal estilo App Móvil -->
+  <div class="w-full max-w-md mx-auto px-5 pt-8 pb-12 flex-1 flex flex-col">
+    
+    <!-- Encabezado -->
+    <header class="text-center mb-8">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-stone-200/80 text-xs font-semibold text-muted shadow-sm mb-3">
+        <span>🎁</span> Edición Limitada &amp; Personal
+      </div>
+      <h1 class="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-ink mb-2">
+        Tu Cuponera VIP
+      </h1>
+      <p class="text-sm text-muted max-w-xs mx-auto leading-relaxed">
+        Úsalos con sabiduría. Una vez canjeados, desaparecen para siempre (sin excepciones 😉).
+      </p>
+    </header>
+
+    <!-- Navegación tipo pestañas (Cupones vs Historial) -->
+    <div class="grid grid-cols-2 p-1 bg-stone-200/60 rounded-2xl mb-6">
+      <button id="tab-coupons" onclick="switchTab('coupons')" class="py-2.5 text-sm font-semibold rounded-xl bg-white text-ink shadow-sm transition-all">
+        Mis Cupones
+      </button>
+      <button id="tab-history" onclick="switchTab('history')" class="py-2.5 text-sm font-semibold rounded-xl text-muted hover:text-ink transition-all flex items-center justify-center gap-1.5">
+        <span>Historial</span>
+        <span id="history-badge" class="px-1.5 py-0.5 text-[11px] rounded-full bg-stone-300/70 text-ink font-bold">0</span>
+      </button>
+    </div>
+
+    <!-- VISTA 1: TARJETAS DE CUPONES -->
+    <main id="view-coupons" class="space-y-5 flex-1">
+      
+      <!-- TARJETA 1: SALTAR PELEA (365) -->
+      <article id="card-peace" class="bg-card rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-stone-200/60 relative overflow-hidden transition-all">
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-coral-light text-coral flex items-center justify-center text-2xl shrink-0">
+              🛡️
+            </div>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-coral">Pase de Paz Mental</span>
+              <h2 class="font-serif text-xl font-bold text-ink leading-tight">Saltar Pelea</h2>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="count-peace" class="text-2xl font-bold text-ink tabular-nums">365</span>
+            <span class="text-xs text-muted block">/ 365 disp.</span>
+          </div>
+        </div>
+
+        <p class="text-sm text-muted leading-relaxed mb-4">
+          Úsalo en cualquier momento para pausar una discusión al instante sin dar explicaciones ni guardar rencores.
+        </p>
+
+        <!-- Barra de progreso -->
+        <div class="w-full h-2 bg-stone-100 rounded-full overflow-hidden mb-5">
+          <div id="bar-peace" class="h-full bg-coral rounded-full transition-all duration-500" style="width: 100%"></div>
+        </div>
+
+        <div class="ticket-divider my-4"></div>
+
+        <button id="btn-peace" onclick="openConfirmModal('peace')" class="w-full py-3.5 px-4 rounded-2xl bg-coral hover:bg-coral-dark active:scale-[0.98] text-white font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2">
+          <span>Canjear 1 cupón</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </article>
+
+      <!-- TARJETA 2: LO QUE YO QUIERA (12) -->
+      <article id="card-wish" class="bg-card rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-stone-200/60 relative overflow-hidden transition-all">
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-gold-light text-gold flex items-center justify-center text-2xl shrink-0">
+              ✨
+            </div>
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-gold">Comodín Supremo</span>
+              <h2 class="font-serif text-xl font-bold text-ink leading-tight">Lo que yo quiera cuando yo quiera</h2>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="count-wish" class="text-2xl font-bold text-ink tabular-nums">12</span>
+            <span class="text-xs text-muted block">/ 12 disp.</span>
+          </div>
+        </div>
+
+        <p class="text-sm text-muted leading-relaxed mb-4">
+          Válido en general para absolutamente lo que tú quieras, en el momento en que tú quieras. Sin letras pequeñas ni restricciones.
+        </p>
+
+        <!-- Barra de progreso -->
+        <div class="w-full h-2 bg-stone-100 rounded-full overflow-hidden mb-5">
+          <div id="bar-wish" class="h-full bg-gold rounded-full transition-all duration-500" style="width: 100%"></div>
+        </div>
+
+        <div class="ticket-divider my-4"></div>
+
+        <button id="btn-wish" onclick="openConfirmModal('wish')" class="w-full py-3.5 px-4 rounded-2xl bg-ink hover:bg-stone-800 active:scale-[0.98] text-white font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2">
+          <span>Canjear cupón</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </article>
+
+    </main>
+
+    <!-- VISTA 2: HISTORIAL DE CANJES -->
+    <section id="view-history" class="hidden flex-1 flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-serif text-lg font-bold text-ink">Historial de cupones usados</h3>
+        <span class="text-xs text-muted">No reembolsables</span>
+      </div>
+
+      <div id="history-list" class="space-y-3 flex-1">
+        <!-- Se llena dinámicamente con JavaScript -->
+      </div>
+    </section>
+
+    <!-- Pie de página discreto con botón Admin -->
+    <footer class="mt-10 pt-6 border-t border-stone-200/70 flex items-center justify-between text-xs text-muted">
+      <span>Hecho con cariño ❤️</span>
+      <button onclick="openAdminModal()" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-stone-200/60 transition-colors" title="Ajustes de creador">
+        <span>🔒</span>
+        <span>Admin</span>
+      </button>
+    </footer>
+  </div>
+
+  <!-- MODAL 1: CONFIRMACIÓN DE CANJE -->
+  <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-ink/40 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-pop">
+      <div id="modal-icon" class="w-14 h-14 rounded-2xl bg-coral-light text-3xl flex items-center justify-center mx-auto mb-4">
+        🛡️
+      </div>
+      <h3 id="modal-title" class="font-serif text-2xl font-bold text-center text-ink mb-2">
+        ¿Seguro que quieres gastar 1 cupón?
+      </h3>
+      <p class="text-sm text-muted text-center mb-5 leading-relaxed">
+        Esta acción no se puede deshacer. Se descontará de tu saldo disponible de forma permanente.
+      </p>
+
+      <div class="mb-5">
+        <label for="redeem-note" class="block text-xs font-semibold text-ink mb-1.5">
+          ¿Qué pediste o qué pasó? (opcional):
+        </label>
+        <input type="text" id="redeem-note" maxlength="60" placeholder="Escribe aquí o déjalo en blanco..." 
+               class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-ink transition-colors bg-stone-50/50">
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="closeConfirmModal()" class="py-3 px-4 rounded-xl border border-stone-200 text-sm font-semibold text-muted hover:bg-stone-50 transition-colors">
+          Cancelar
+        </button>
+        <button id="confirm-redeem-btn" onclick="confirmRedeem()" class="py-3 px-4 rounded-xl bg-coral text-white text-sm font-semibold shadow-sm hover:opacity-95 active:scale-[0.98] transition-all">
+          Sí, usar ahora
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CELEBRACIÓN / RESULTADO DEL CANJE -->
+  <div id="success-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-ink/40 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-6 text-center shadow-2xl animate-pop">
+      <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 text-3xl flex items-center justify-center mx-auto mb-4">
+        🎉
+      </div>
+      <span class="inline-block px-3 py-1 rounded-full bg-stone-100 text-[11px] font-bold uppercase tracking-wider text-muted mb-2">
+        Cupón Validado
+      </span>
+      <h3 class="font-serif text-2xl font-bold text-ink mb-2">
+        ¡Canje Exitoso!
+      </h3>
+      <p id="success-message" class="text-sm text-muted leading-relaxed mb-6">
+        Pelea oficialmente cancelada. Respira hondo y disfruta tu paz.
+      </p>
+      <button onclick="closeSuccessModal()" class="w-full py-3.5 px-4 rounded-2xl bg-ink text-white text-sm font-semibold hover:bg-stone-800 transition-colors">
+        ¡Listo, entendido!
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: ADMINISTRADOR (PARA REINICIAR EN PRUEBAS) -->
+  <div id="admin-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-ink/40 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-pop">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-serif text-xl font-bold text-ink">Modo Creador 🔒</h3>
+        <button onclick="closeAdminModal()" class="text-muted hover:text-ink text-lg p-1">✕</button>
+      </div>
+      <p class="text-xs text-muted mb-4 leading-relaxed">
+        Ingresa el PIN secreto para reiniciar los contadores a 365 y 12 (útil después de hacer pruebas antes de regalarla).
+      </p>
+      <input type="password" id="admin-pin" inputmode="numeric" maxlength="4" placeholder="PIN (Por defecto: 1234)" 
+             class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm text-center tracking-widest font-bold mb-2 focus:outline-none focus:border-ink">
+      <p id="admin-error" class="text-xs text-red-500 text-center hidden mb-3">PIN incorrecto. Intenta de nuevo.</p>
+      <button onclick="resetAllCoupons()" class="w-full py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors mt-2">
+        Reiniciar todos los cupones
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // CONFIGURACIÓN INICIAL (Puedes editar esto)
+    // ==========================================
+    const CONFIG = {
+      STORAGE_KEY: 'cuponera_vip_data_v1',
+      ADMIN_PIN: '1234', // Cambia este PIN si deseas
+      INITIAL_PEACE: 365,
+      INITIAL_WISH: 12
+    };
+
+    // Mensajes divertidos aleatorios al canjear
+    const FUNNY_MESSAGES = {
+      peace: [
+        "🛡️ ¡Escudo activado! Esta discusión queda oficialmente disuelta por decreto real.",
+        "🕊️ Paloma de la paz enviada. Nadie tiene la razón, ambos ganan, tema cerrado.",
+        "🤫 Shhh... aquí no pasó nada. Tienes inmunidad diplomática por hoy.",
+        "✨ ¡Pelea esquivada como en Matrix! Te quedan menos vidas, úsalas bien."
+      ],
+      wish: [
+        "👑 ¡Tus deseos son órdenes! Muestra esta pantalla para reclamar tu capricho.",
+        "✨ Comodín aplicado. Prohibido poner excusas o decir 'luego vemos'.",
+        "🎯 ¡Boom! Has usado uno de tus 12 poderes supremos. Disfrútalo al máximo.",
+        "🎁 Vale oficializado. No admite devoluciones ni negociaciones."
+      ]
+    };
+
+    // Estado global de la aplicación
+    let state = {
+      peaceLeft: CONFIG.INITIAL_PEACE,
+      wishLeft: CONFIG.INITIAL_WISH,
+      history: []
+    };
+
+    let currentCouponType = null;
+
+    // Cargar datos guardados en el dispositivo
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
+        if (saved) {
+          state = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error("Error leyendo memoria local:", e);
+      }
+      updateUI();
+    }
+
+    // Guardar datos de forma permanente en el navegador
+    function saveState() {
+      try {
+        localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error("Error guardando memoria local:", e);
+      }
+    }
+
+    // Actualizar contadores, barras y lista de historial en pantalla
+    function updateUI() {
+      // Actualizar números
+      document.getElementById('count-peace').textContent = state.peaceLeft;
+      document.getElementById('count-wish').textContent = state.wishLeft;
+
+      // Actualizar barras de progreso
+      const peacePct = (state.peaceLeft / CONFIG.INITIAL_PEACE) * 100;
+      const wishPct = (state.wishLeft / CONFIG.INITIAL_WISH) * 100;
+      document.getElementById('bar-peace').style.width = `${peacePct}%`;
+      document.getElementById('bar-wish').style.width = `${wishPct}%`;
+
+      // Deshabilitar botones si llegan a 0
+      const btnPeace = document.getElementById('btn-peace');
+      if (state.peaceLeft <= 0) {
+        btnPeace.disabled = true;
+        btnPeace.className = "w-full py-3.5 px-4 rounded-2xl bg-stone-200 text-stone-400 font-semibold text-sm cursor-not-allowed";
+        btnPeace.innerHTML = "<span>Cupones Agotados 🔒</span>";
+      } else {
+        btnPeace.disabled = false;
+        btnPeace.className = "w-full py-3.5 px-4 rounded-2xl bg-coral hover:bg-coral-dark active:scale-[0.98] text-white font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2";
+        btnPeace.innerHTML = '<span>Canjear 1 cupón</span><span aria-hidden="true">→</span>';
+      }
+
+      const btnWish = document.getElementById('btn-wish');
+      if (state.wishLeft <= 0) {
+        btnWish.disabled = true;
+        btnWish.className = "w-full py-3.5 px-4 rounded-2xl bg-stone-200 text-stone-400 font-semibold text-sm cursor-not-allowed";
+        btnWish.innerHTML = "<span>Agotado 🔒</span>";
+      } else {
+        btnWish.disabled = false;
+        btnWish.className = "w-full py-3.5 px-4 rounded-2xl bg-ink hover:bg-stone-800 active:scale-[0.98] text-white font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2";
+        btnWish.innerHTML = '<span>Canjear cupón</span><span aria-hidden="true">→</span>';
+      }
+
+      // Actualizar contador de historial
+      document.getElementById('history-badge').textContent = state.history.length;
+      renderHistory();
+    }
+
+    // Dibujar el historial de cupones usados
+    function renderHistory() {
+      const listEl = document.getElementById('history-list');
+      
+      if (state.history.length === 0) {
+        listEl.innerHTML = `
+          <div class="bg-white rounded-3xl p-8 text-center border border-stone-200/60">
+            <div class="text-3xl mb-2">🎟️</div>
+            <p class="text-sm font-semibold text-ink mb-1">Aún no has gastado ningún cupón</p>
+            <p class="text-xs text-muted">Tienes tus 377 oportunidades intactas.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Mostrar los más recientes primero
+      listEl.innerHTML = state.history.slice().reverse().map(item => {
+        const isPeace = item.type === 'peace';
+        const icon = isPeace ? '🛡️' : '✨';
+        const title = isPeace ? 'Saltar Pelea' : 'Lo que yo quiera cuando yo quiera';
+        const badgeStyle = isPeace ? 'bg-coral-light text-coral' : 'bg-gold-light text-gold';
+        
+        return `
+          <div class="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-xs flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl ${badgeStyle} flex items-center justify-center text-lg shrink-0 mt-0.5">
+                ${icon}
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-sm text-ink">${title}</h4>
+                </div>
+                <p class="text-xs text-muted mt-0.5">${item.date}</p>
+                ${item.note ? `<p class="text-xs text-ink bg-stone-100 px-2.5 py-1 rounded-lg mt-2 inline-block">"${escapeHTML(item.note)}"</p>` : ''}
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-md bg-stone-100 text-[10px] font-bold uppercase tracking-wider text-stone-500 border border-stone-200 shrink-0">
+              USADO
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Evitar inyección de HTML en notas
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[tag]));
+    }
+
+    // Cambiar entre pestaña de Cupones e Historial
+    function switchTab(tab) {
+      const viewCoupons = document.getElementById('view-coupons');
+      const viewHistory = document.getElementById('view-history');
+      const tabCoupons = document.getElementById('tab-coupons');
+      const tabHistory = document.getElementById('tab-history');
+
+      if (tab === 'coupons') {
+        viewCoupons.classList.remove('hidden');
+        viewHistory.classList.add('hidden');
+        tabCoupons.className = "py-2.5 text-sm font-semibold rounded-xl bg-white text-ink shadow-sm transition-all";
+        tabHistory.className = "py-2.5 text-sm font-semibold rounded-xl text-muted hover:text-ink transition-all flex items-center justify-center gap-1.5";
+      } else {
+        viewCoupons.classList.add('hidden');
+        viewHistory.classList.remove('hidden');
+        viewHistory.classList.add('flex');
+        tabHistory.className = "py-2.5 text-sm font-semibold rounded-xl bg-white text-ink shadow-sm transition-all flex items-center justify-center gap-1.5";
+        tabCoupons.className = "py-2.5 text-sm font-semibold rounded-xl text-muted hover:text-ink transition-all";
+      }
+    }
+
+    // Abrir modal de confirmación
+    function openConfirmModal(type) {
+      if (type === 'peace' && state.peaceLeft <= 0) return;
+      if (type === 'wish' && state.wishLeft <= 0) return;
+
+      currentCouponType = type;
+      const modal = document.getElementById('confirm-modal');
+      const iconEl = document.getElementById('modal-icon');
+      const titleEl = document.getElementById('modal-title');
+      const btnEl = document.getElementById('confirm-redeem-btn');
+      
+      document.getElementById('redeem-note').value = '';
+
+      if (type === 'peace') {
+        iconEl.textContent = '🛡️';
+        iconEl.className = 'w-14 h-14 rounded-2xl bg-coral-light text-3xl flex items-center justify-center mx-auto mb-4';
+        titleEl.textContent = '¿Seguro que quieres gastar 1 cupón?';
+        btnEl.className = 'py-3 px-4 rounded-xl bg-coral text-white text-sm font-semibold shadow-sm hover:opacity-95 active:scale-[0.98] transition-all';
+      } else {
+        iconEl.textContent = '✨';
+        iconEl.className = 'w-14 h-14 rounded-2xl bg-gold-light text-3xl flex items-center justify-center mx-auto mb-4';
+        titleEl.textContent = '¿Seguro que quieres gastar 1 cupón?';
+        btnEl.className = 'py-3 px-4 rounded-xl bg-ink text-white text-sm font-semibold shadow-sm hover:opacity-95 active:scale-[0.98] transition-all';
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeConfirmModal() {
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      currentCouponType = null;
+    }
+
+    // Ejecutar el canje permanente
+    function confirmRedeem() {
+      if (!currentCouponType) return;
+
+      const noteInput = document.getElementById('redeem-note').value.trim();
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString('es-ES', {
+        day: 'numeric', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      if (currentCouponType === 'peace' && state.peaceLeft > 0) {
+        state.peaceLeft -= 1;
+      } else if (currentCouponType === 'wish' && state.wishLeft > 0) {
+        state.wishLeft -= 1;
+      }
+
+      // Guardar en el historial
+      state.history.push({
+        id: Date.now(),
+        type: currentCouponType,
+        date: formattedDate,
+        note: noteInput
+      });
+
+      const usedType = currentCouponType;
+      saveState();
+      updateUI();
+      closeConfirmModal();
+
+      // Lanzar confeti y mostrar mensaje divertido
+      triggerConfetti(usedType);
+      showSuccessModal(usedType);
+    }
+
+    function triggerConfetti(type) {
+      if (typeof confetti === 'function') {
+        const colors = type === 'peace' ? ['#E06D53', '#FAF8F5', '#1E1D1B'] : ['#D99B26', '#FDE68A', '#1E1D1B'];
+        confetti({
+          particleCount: 70,
+          spread: 65,
+          origin: { y: 0.6 },
+          colors: colors
+        });
+      }
+    }
+
+    function showSuccessModal(type) {
+      const messages = FUNNY_MESSAGES[type];
+      const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+      document.getElementById('success-message').textContent = randomMsg;
+      
+      const modal = document.getElementById('success-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSuccessModal() {
+      const modal = document.getElementById('success-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Funciones del panel Administrador
+    function openAdminModal() {
+      document.getElementById('admin-pin').value = '';
+      document.getElementById('admin-error').classList.add('hidden');
+      const modal = document.getElementById('admin-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeAdminModal() {
+      const modal = document.getElementById('admin-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function resetAllCoupons() {
+      const pin = document.getElementById('admin-pin').value;
+      if (pin === CONFIG.ADMIN_PIN) {
+        state = {
+          peaceLeft: CONFIG.INITIAL_PEACE,
+          wishLeft: CONFIG.INITIAL_WISH,
+          history: []
+        };
+        saveState();
+        updateUI();
+        closeAdminModal();
+      } else {
+        document.getElementById('admin-error').classList.remove('hidden');
+      }
+    }
+
+    // Iniciar la app al cargar
+    window.addEventListener('DOMContentLoaded', loadState);
+  </script>
+</body>
+</html>
